@@ -47,6 +47,14 @@ variable "managed_hardware_security_module_key" {
   default = []
 }
 
+variable "virtual_network_name" {
+  type = string
+}
+
+variable "subnet_name" {
+  type = string
+}
+
 variable "account" {
   type = list(object({
     id = any
@@ -55,6 +63,7 @@ variable "account" {
     tags = optional(map(string))
     minimal_tls_version = optional(string)
     create_mode = optional(string)
+    default_identity_type = optional(string)
     kind = optional(string)
     ip_range_filter = optional(list(string))
     free_tier_enabled = optional(bool)
@@ -126,6 +135,47 @@ variable "account" {
         graph_names = optional(list(any))
       })), [])
     })), [])
+  }))
+  default = []
+
+  validation {
+    condition = length([for a in var.account : true if contains(["Tls", "Tls11", "Tls12"], a.minimal_tls_version)]) == length(var.account)
+    error_message = "Possible values are: Tls, Tls11, and Tls12. Defaults to Tls12."
+  }
+
+  validation {
+    condition = length([for b in var.account : true if contains(["Default", "Restore"], b.create_mode)]) == length(var.account)
+    error_message = "Possible values are Default and Restore."
+  }
+
+  validation {
+    condition = length([for c in var.account : true if contains(["FirstPartyIdentity", "SystemAssignedIdentity", "UserAssignedIdentity"], c.default_identity_type)]) == length(var.account)
+    error_message = "Possible values are FirstPartyIdentity, SystemAssignedIdentity or UserAssignedIdentity."
+  }
+
+  validation {
+    condition = length([for d in var.account : true if contains(["GlobalDocumentDB", "MongoDB", "Parse"], d.kind)]) == length(var.account)
+    error_message = "Possible values are GlobalDocumentDB, MongoDB and Parse."
+  }
+
+  validation {
+    condition = length([for e in var.account : true if contains(["7.0", "6.0", "5.0", "4.2", "4.0", "3.6", "3.2"], e.mongo_server_version)]) == length(var.account)
+    error_message = "Possible values are 7.0, 6.0, 5.0, 4.2, 4.0, 3.6, and 3.2."
+  }
+}
+
+variable "cassandra_cluster" {
+  type = list(object({
+    id = any
+    default_admin_password = string
+    name                           = string
+    authentication_method = optional(string)
+    external_gossip_certificate_pems = optional(list(string))
+    external_seed_node_ip_addresses = optional(list(string))
+    hours_between_backups = optional(number)
+    repair_enabled = optional(bool)
+    version = optional(string)
+    tags = optional(map(string))
   }))
   default = []
 }

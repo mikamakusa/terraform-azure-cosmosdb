@@ -7,7 +7,7 @@ resource "azurerm_cosmosdb_account" "this" {
   tags = lookup(var.account[count.index], "tags")
   minimal_tls_version = lookup(var.account[count.index], "minimal_tls_version")
   create_mode = lookup(var.account[count.index], "create_mode")
-  default_identity_type = var.user_assigned_identity_name ? join("=", ["UserAssignedIdentity", data.azurerm_user_assigned_identity.this.id]) : null
+  default_identity_type = var.user_assigned_identity_name ? join("=", ["UserAssignedIdentity", data.azurerm_user_assigned_identity.this.id]) : lookup(var.account[count.index], "default_identity_type")
   kind = lookup(var.account[count.index], "kind")
   ip_range_filter = lookup(var.account[count.index], "ip_range_filter")
   free_tier_enabled = lookup(var.account[count.index], "free_tier_enabled")
@@ -126,5 +126,24 @@ resource "azurerm_cosmosdb_account" "this" {
         }
       }
     }
+  }
+}
+
+resource "azurerm_cosmosdb_cassandra_cluster" "this" {
+  count = length(var.cassandra_cluster)
+  default_admin_password         = sensitive(lookup(var.cassandra_cluster[count.index], "default_admin_password"))
+  delegated_management_subnet_id = data.azurerm_subnet.this.id
+  location                       = data.azurerm_resource_group.this.location
+  name                           = lookup(var.cassandra_cluster[count.index], "name")
+  resource_group_name            = data.azurerm_resource_group.this.name
+  authentication_method = lookup(var.cassandra_cluster[count.index], "authentication_method")
+  external_gossip_certificate_pems = lookup(var.cassandra_cluster[count.index], "external_gossip_certificate_pems")
+  external_seed_node_ip_addresses = lookup(var.cassandra_cluster[count.index], "external_seed_node_ip_addresses")
+  hours_between_backups = lookup(var.cassandra_cluster[count.index], "hours_between_backups")
+  repair_enabled = trulookup(var.cassandra_cluster[count.index], "repair_enabled")
+  version = lookup(var.cassandra_cluster[count.index], "version")
+  tags = lookup(var.cassandra_cluster[count.index], "tags")
+  identity {
+    type = "SystemAssigned"
   }
 }

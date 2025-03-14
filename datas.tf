@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "3.0.2"
+    }
+  }
+}
 data "azurerm_resource_group" "this" {
   name = var.resource_group_name
 }
@@ -30,4 +38,15 @@ data "azurerm_key_vault_managed_hardware_security_module_key" "this" {
   count = var.managed_hardware_security_module_key_name ? 1 : 0
   managed_hsm_id = data.azurerm_key_vault_managed_hardware_security_module.this.id
   name           = var.managed_hardware_security_module_key_name
+}
+
+data "azurerm_virtual_network" "this" {
+  name                = var.virtual_network_name
+  resource_group_name = data.azurerm_resource_group.this.name
+}
+
+data "azurerm_subnet" "this" {
+  name                 = var.subnet_name
+  resource_group_name  = data.azurerm_resource_group.this.name
+  virtual_network_name = data.azurerm_virtual_network.this.name
 }
