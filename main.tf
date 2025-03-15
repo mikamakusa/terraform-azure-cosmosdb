@@ -163,3 +163,18 @@ resource "azurerm_cosmosdb_cassandra_datacenter" "this" {
   sku_name                        = lookup(var.cassandra_datacenter[count.index], "sku_name")
   availability_zones_enabled      = lookup(var.cassandra_datacenter[count.index], "availability_zones_enabled")
 }
+
+resource "azurerm_cosmosdb_cassandra_keyspace" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) == 0 ? 0 : length(var.cassandra_keyspace)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.cassandra_keyspace[count.index], "account_id"))
+  name                = lookup(var.cassandra_keyspace[count.index], "name")
+  resource_group_name = data.azurerm_resource_group.this.name
+  throughput          = lookup(var.cassandra_keyspace[count.index], "throughput")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.cassandra_keyspace[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+}

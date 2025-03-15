@@ -21,3 +21,11 @@ output "cassandra_datacenter_id" {
 output "cassandra_datacenter_name" {
   value = try(azurerm_cosmosdb_cassandra_datacenter.this.*.name)
 }
+
+output "cassandra_keyspace_id" {
+  value = try(azurerm_cosmosdb_cassandra_keyspace.this.*.id)
+}
+
+output "cassandra_keyspace_name" {
+  value = try(azurerm_cosmosdb_cassandra_keyspace.this.*.name)
+}

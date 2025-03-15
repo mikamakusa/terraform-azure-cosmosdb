@@ -55,6 +55,11 @@ variable "subnet_name" {
   type = string
 }
 
+variable "cosmosdb_account_name" {
+  type = string
+  default = null
+}
+
 variable "account" {
   type = list(object({
     id                                    = any
@@ -193,6 +198,19 @@ variable "cassandra_datacenter" {
     managed_disk_customer_key_uri   = optional(string)
     sku_name                        = optional(string)
     availability_zones_enabled      = optional(bool)
+  }))
+  default = []
+}
+
+variable "cassandra_keyspace" {
+  type = list(object({
+    id         = any
+    account_id = any
+    name       = string
+    throughput = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
   }))
   default = []
 }
