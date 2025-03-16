@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "3.0.2"
-    }
-  }
-}
 data "azurerm_resource_group" "this" {
   name = var.resource_group_name
 }

@@ -2,15 +2,15 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | 3.0.2 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | > =4.14.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.0.0 |
+| <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | ~> 3.0.2 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.14.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | > =4.14.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 4.14.0 |
 
 ## Modules
 
@@ -26,6 +26,7 @@
 | [azurerm_cosmosdb_cassandra_cluster.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_cassandra_cluster) | resource |
 | [azurerm_cosmosdb_cassandra_datacenter.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_cassandra_datacenter) | resource |
 | [azurerm_cosmosdb_cassandra_keyspace.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_cassandra_keyspace) | resource |
+| [azurerm_cosmosdb_cassandra_table.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_cassandra_table) | resource |
 | [azurerm_cosmosdb_account.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/cosmosdb_account) | data source |
 | [azurerm_key_vault.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) | data source |
 | [azurerm_key_vault_key.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_key) | data source |
@@ -44,6 +45,7 @@
 | <a name="input_cassandra_cluster"></a> [cassandra\_cluster](#input\_cassandra\_cluster) | n/a | <pre>list(object({<br/>    id                               = any<br/>    default_admin_password           = string<br/>    name                             = string<br/>    authentication_method            = optional(string)<br/>    external_gossip_certificate_pems = optional(list(string))<br/>    external_seed_node_ip_addresses  = optional(list(string))<br/>    hours_between_backups            = optional(number)<br/>    repair_enabled                   = optional(bool)<br/>    version                          = optional(string)<br/>    tags                             = optional(map(string))<br/>  }))</pre> | `[]` | no |
 | <a name="input_cassandra_datacenter"></a> [cassandra\_datacenter](#input\_cassandra\_datacenter) | n/a | <pre>list(object({<br/>    id                              = any<br/>    cassandra_cluster_id            = any<br/>    name                            = string<br/>    node_count                      = optional(number)<br/>    backup_storage_customer_key_uri = optional(string)<br/>    base64_encoded_yaml_fragment    = optional(string)<br/>    disk_count                      = optional(number)<br/>    disk_sku                        = optional(string)<br/>    managed_disk_customer_key_uri   = optional(string)<br/>    sku_name                        = optional(string)<br/>    availability_zones_enabled      = optional(bool)<br/>  }))</pre> | `[]` | no |
 | <a name="input_cassandra_keyspace"></a> [cassandra\_keyspace](#input\_cassandra\_keyspace) | n/a | <pre>list(object({<br/>    id         = any<br/>    account_id = any<br/>    name       = string<br/>    throughput = optional(number)<br/>    autoscale_settings = optional(list(object({<br/>      max_throughput = optional(number)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_cassandra_table"></a> [cassandra\_table](#input\_cassandra\_table) | n/a | <pre>list(object({<br/>    id                     = any<br/>    cassandra_keyspace_id  = any<br/>    name                   = string<br/>    throughput             = optional(number)<br/>    default_ttl            = optional(number)<br/>    analytical_storage_ttl = optional(number)<br/>    autoscale_settings = optional(list(object({<br/>      max_throughput = optional(number)<br/>    })), [])<br/>    schema = optional(list(object({<br/>      cluster_key = optional(list(object({<br/>        name     = string<br/>        order_by = string<br/>      })), [])<br/>      column = optional(list(object({<br/>        name = string<br/>        type = string<br/>      })), [])<br/>      partition_key = optional(list(object({<br/>        name = string<br/>      })), [])<br/>    })), [])<br/>  }))</pre> | `[]` | no |
 | <a name="input_cosmosdb_account_name"></a> [cosmosdb\_account\_name](#input\_cosmosdb\_account\_name) | n/a | `string` | `null` | no |
 | <a name="input_key_vault"></a> [key\_vault](#input\_key\_vault) | n/a | `any` | `[]` | no |
 | <a name="input_key_vault_key"></a> [key\_vault\_key](#input\_key\_vault\_key) | n/a | `any` | `[]` | no |
@@ -68,5 +70,7 @@
 | <a name="output_cassandra_datacenter_name"></a> [cassandra\_datacenter\_name](#output\_cassandra\_datacenter\_name) | n/a |
 | <a name="output_cassandra_keyspace_id"></a> [cassandra\_keyspace\_id](#output\_cassandra\_keyspace\_id) | n/a |
 | <a name="output_cassandra_keyspace_name"></a> [cassandra\_keyspace\_name](#output\_cassandra\_keyspace\_name) | n/a |
+| <a name="output_cassandra_table_id"></a> [cassandra\_table\_id](#output\_cassandra\_table\_id) | n/a |
+| <a name="output_cassandra_table_name"></a> [cassandra\_table\_name](#output\_cassandra\_table\_name) | n/a |
 | <a name="output_cosmosdb_account_id"></a> [cosmosdb\_account\_id](#output\_cosmosdb\_account\_id) | n/a |
 | <a name="output_cosmosdb_account_name"></a> [cosmosdb\_account\_name](#output\_cosmosdb\_account\_name) | n/a |

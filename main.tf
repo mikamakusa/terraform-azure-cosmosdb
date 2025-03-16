@@ -178,3 +178,45 @@ resource "azurerm_cosmosdb_cassandra_keyspace" "this" {
     }
   }
 }
+
+resource "azurerm_cosmosdb_cassandra_table" "this" {
+  count                  = length(var.cassandra_keyspace) == 0 ? 0 : length(var.cassandra_table)
+  cassandra_keyspace_id  = element(azurerm_cosmosdb_cassandra_keyspace.this.*.id, lookup(var.cassandra_table[count.index], "cassandra_keyspace_id"))
+  name                   = lookup(var.cassandra_table[count.index], "name")
+  throughput             = lookup(var.cassandra_table[count.index], "throughput")
+  default_ttl            = lookup(var.cassandra_table[count.index], "default_ttl")
+  analytical_storage_ttl = lookup(var.cassandra_table[count.index], "analytical_storage_ttl")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.cassandra_table[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+
+  dynamic "schema" {
+    for_each = try(lookup(var.cassandra_table[count.index], "schema") == null ? [] : ["schema"])
+    content {
+      dynamic "cluster_key" {
+        for_each = try(lookup(schema.value, "cluster_key") == null ? [] : ["cluster_key"])
+        content {
+          name     = lookup(cluster_key.value, "name")
+          order_by = lookup(cluster_key.value, "order_by")
+        }
+      }
+      dynamic "column" {
+        for_each = try(lookup(schema.value, "column") == null ? [] : ["column"])
+        content {
+          name = lookup(column.value, "name")
+          type = lookup(column.value, "type")
+        }
+      }
+      dynamic "partition_key" {
+        for_each = try(lookup(schema.value, "partition_key") == null ? [] : ["partition_key"])
+        content {
+          name = lookup(partition_key.value, "name")
+        }
+      }
+    }
+  }
+}

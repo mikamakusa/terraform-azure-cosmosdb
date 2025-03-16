@@ -29,3 +29,11 @@ output "cassandra_keyspace_id" {
 output "cassandra_keyspace_name" {
   value = try(azurerm_cosmosdb_cassandra_keyspace.this.*.name)
 }
+
+output "cassandra_table_id" {
+  value = try(azurerm_cosmosdb_cassandra_table.this.*.id)
+}
+
+output "cassandra_table_name" {
+  value = try(azurerm_cosmosdb_cassandra_table.this.*.name)
+}

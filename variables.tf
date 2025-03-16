@@ -56,7 +56,7 @@ variable "subnet_name" {
 }
 
 variable "cosmosdb_account_name" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -210,6 +210,34 @@ variable "cassandra_keyspace" {
     throughput = optional(number)
     autoscale_settings = optional(list(object({
       max_throughput = optional(number)
+    })), [])
+  }))
+  default = []
+}
+
+variable "cassandra_table" {
+  type = list(object({
+    id                     = any
+    cassandra_keyspace_id  = any
+    name                   = string
+    throughput             = optional(number)
+    default_ttl            = optional(number)
+    analytical_storage_ttl = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+    schema = optional(list(object({
+      cluster_key = optional(list(object({
+        name     = string
+        order_by = string
+      })), [])
+      column = optional(list(object({
+        name = string
+        type = string
+      })), [])
+      partition_key = optional(list(object({
+        name = string
+      })), [])
     })), [])
   }))
   default = []
