@@ -115,6 +115,7 @@
 | <a name="output_cassandra_table_name"></a> [cassandra\_table\_name](#output\_cassandra\_table\_name) | n/a |
 | <a name="output_cosmosdb_account_id"></a> [cosmosdb\_account\_id](#output\_cosmosdb\_account\_id) | n/a |
 | <a name="output_cosmosdb_account_name"></a> [cosmosdb\_account\_name](#output\_cosmosdb\_account\_name) | n/a |
+| <a name="output_cosmosdb_account_primary_key"></a> [cosmosdb\_account\_primary\_key](#output\_cosmosdb\_account\_primary\_key) | n/a |
 | <a name="output_gremlin_database_id"></a> [gremlin\_database\_id](#output\_gremlin\_database\_id) | n/a |
 | <a name="output_gremlin_database_name"></a> [gremlin\_database\_name](#output\_gremlin\_database\_name) | n/a |
 | <a name="output_gremlin_graph_id"></a> [gremlin\_graph\_id](#output\_gremlin\_graph\_id) | n/a |

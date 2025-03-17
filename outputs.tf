@@ -6,6 +6,10 @@ output "cosmosdb_account_name" {
   value = try(azurerm_cosmosdb_account.this.*.name)
 }
 
+output "cosmosdb_account_primary_key" {
+  value = try(azurerm_cosmosdb_account.this.*.primary_key)
+}
+
 output "cassandra_cluster_id" {
   value = try(azurerm_cosmosdb_cassandra_cluster.this.*.id)
 }
