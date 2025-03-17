@@ -374,3 +374,219 @@ resource "azurerm_cosmosdb_mongo_user_definition" "this" {
   username                 = sensitive(lookup(var.mongo_user_definition[count.index], "username"))
   inherited_role_names     = lookup(var.mongo_user_definition[count.index], "inherited_role_names")
 }
+
+resource "azurerm_cosmosdb_postgresql_cluster" "this" {
+  count                                = length(var.postgresql_cluster)
+  location                             = data.azurerm_resource_group.this.location
+  name                                 = lookup(var.postgresql_cluster[count.index], "name")
+  node_count                           = lookup(var.postgresql_cluster[count.index], "node_count")
+  resource_group_name                  = data.azurerm_resource_group.this.name
+  administrator_login_password         = lookup(var.postgresql_cluster[count.index], "administrator_login_password")
+  citus_version                        = lookup(var.postgresql_cluster[count.index], "citus_version")
+  coordinator_public_ip_access_enabled = lookup(var.postgresql_cluster[count.index], "coordinator_public_ip_access_enabled")
+  coordinator_server_edition           = lookup(var.postgresql_cluster[count.index], "coordinator_server_edition")
+  coordinator_storage_quota_in_mb      = lookup(var.postgresql_cluster[count.index], "coordinator_storage_quota_in_mb")
+  coordinator_vcore_count              = lookup(var.postgresql_cluster[count.index], "coordinator_vcore_count")
+  ha_enabled                           = lookup(var.postgresql_cluster[count.index], "ha_enabled")
+  node_public_ip_access_enabled        = lookup(var.postgresql_cluster[count.index], "node_public_ip_access_enabled")
+  node_server_edition                  = lookup(var.postgresql_cluster[count.index], "node_server_edition")
+  node_storage_quota_in_mb             = lookup(var.postgresql_cluster[count.index], "node_storage_quota_in_mb")
+  node_vcores                          = lookup(var.postgresql_cluster[count.index], "node_vcores")
+  point_in_time_in_utc                 = lookup(var.postgresql_cluster[count.index], "point_in_time_in_utc")
+  preferred_primary_zone               = lookup(var.postgresql_cluster[count.index], "preferred_primary_zone")
+  shards_on_coordinator_enabled        = lookup(var.postgresql_cluster[count.index], "shards_on_coordinator_enabled")
+  source_location                      = lookup(var.postgresql_cluster[count.index], "source_location")
+  source_resource_id                   = lookup(var.postgresql_cluster[count.index], "source_resource_id")
+  sql_version                          = lookup(var.postgresql_cluster[count.index], "sql_version")
+  tags                                 = lookup(var.postgresql_cluster[count.index], "tags")
+}
+
+resource "azurerm_cosmosdb_postgresql_coordinator_configuration" "this" {
+  count      = length(var.postgresql_cluster) == 0 ? 0 : length(var.postgresql_coordinator_configuration)
+  cluster_id = element(azurerm_cosmosdb_postgresql_cluster.this.*.id, lookup(var.postgresql_coordinator_configuration[count.index], "cluster_id"))
+  name       = lookup(var.postgresql_coordinator_configuration[count.index], "name")
+  value      = lookup(var.postgresql_coordinator_configuration[count.index], "value")
+}
+
+resource "azurerm_cosmosdb_postgresql_firewall_rule" "this" {
+  count            = length(var.postgresql_cluster) == 0 ? 0 : length(var.postgresql_firewall_rule)
+  cluster_id       = element(azurerm_cosmosdb_postgresql_cluster.this.*.id, lookup(var.postgresql_firewall_rule[count.index], "cluster_id"))
+  end_ip_address   = lookup(var.postgresql_firewall_rule[count.index], "end_ip_address")
+  name             = lookup(var.postgresql_firewall_rule[count.index], "name")
+  start_ip_address = lookup(var.postgresql_firewall_rule[count.index], "start_ip_address")
+}
+
+resource "azurerm_cosmosdb_postgresql_node_configuration" "this" {
+  count      = length(var.postgresql_cluster) == 0 ? 0 : length(var.postgresql_node_configuration)
+  cluster_id = element(azurerm_cosmosdb_postgresql_cluster.this.*.id, lookup(var.postgresql_node_configuration[count.index], "cluster_id"))
+  name       = lookup(var.postgresql_node_configuration[count.index], "name")
+  value      = lookup(var.postgresql_node_configuration[count.index], "value")
+}
+
+resource "azurerm_cosmosdb_postgresql_role" "this" {
+  count      = length(var.postgresql_cluster) == 0 ? 0 : length(var.postgresql_role)
+  cluster_id = element(azurerm_cosmosdb_postgresql_cluster.this.*.id, lookup(var.postgresql_role[count.index], "cluster_id"))
+  name       = lookup(var.postgresql_role[count.index], "name")
+  password   = sensitive(lookup(var.postgresql_role[count.index], "password"))
+}
+
+resource "azurerm_cosmosdb_sql_container" "this" {
+  count                  = (length(var.account) || var.cosmosdb_account_name) && length(var.sql_database) == 0 ? 0 : length(var.sql_container)
+  account_name           = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.sql_container[count.index], "account_id"))
+  database_name          = element(azurerm_cosmosdb_sql_database.this.*.name, lookup(var.sql_container[count.index], "database_id"))
+  name                   = lookup(var.sql_container[count.index], "name")
+  partition_key_paths    = lookup(var.sql_container[count.index], "partition_key_paths")
+  resource_group_name    = data.azurerm_resource_group.this.name
+  partition_key_kind     = lookup(var.sql_container[count.index], "partition_key_kind")
+  partition_key_version  = lookup(var.sql_container[count.index], "partition_key_version")
+  default_ttl            = lookup(var.sql_container[count.index], "default_ttl")
+  analytical_storage_ttl = lookup(var.sql_container[count.index], "analytical_storage_ttl")
+  throughput             = lookup(var.sql_container[count.index], "throughput")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.sql_container[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+
+  dynamic "conflict_resolution_policy" {
+    for_each = try(lookup(var.sql_container[count.index], "conflict_resolution_policy") == null ? [] : ["conflict_resolution_policy"])
+    content {
+      mode                          = lookup(conflict_resolution_policy.value, "mode")
+      conflict_resolution_path      = lookup(conflict_resolution_policy.value, "conflict_resolution_path")
+      conflict_resolution_procedure = lookup(conflict_resolution_policy.value, "conflict_resolution_procedure")
+    }
+  }
+
+  dynamic "indexing_policy" {
+    for_each = try(lookup(var.sql_container[count.index], "indexing_policy") == null ? [] : ["indexing_policy"])
+    content {
+      indexing_mode = lookup(indexing_policy.value, "indexing_mode")
+
+      dynamic "included_path" {
+        for_each = try(lookup(indexing_policy.value, "included_path") == null ? [] : ["included_path"])
+        content {
+          path = lookup(included_path.value, "path")
+        }
+      }
+
+      dynamic "composite_index" {
+        for_each = try(lookup(indexing_policy.value, "composite_index") == null ? [] : ["composite_index"])
+        content {
+          dynamic "index" {
+            for_each = lookup(composite_index.value, "index")
+            content {
+              order = lookup(index.value, "order")
+              path  = lookup(index.value, "path")
+            }
+          }
+        }
+      }
+
+      dynamic "spatial_index" {
+        for_each = try(lookup(indexing_policy.value, "spatial_index") == null ? [] : ["spatial_index"])
+        content {
+          path = lookup(spatial_index.value, "path")
+        }
+      }
+    }
+  }
+
+  dynamic "unique_key" {
+    for_each = try(lookup(var.sql_container[count.index], "unique_key") == null ? [] : ["unique_key"])
+    content {
+      paths = lookup(unique_key.value, "paths")
+    }
+  }
+}
+
+resource "azurerm_cosmosdb_sql_database" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) && length(var.sql_database) == 0 ? 0 : length(var.sql_database)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.sql_database[count.index], "account_id"))
+  name                = lookup(var.sql_database[count.index], "name")
+  resource_group_name = data.azurerm_resource_group.this.name
+  throughput          = lookup(var.sql_database[count.index], "throughput")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.sql_database[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+}
+
+resource "azurerm_cosmosdb_sql_dedicated_gateway" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) == 0 ? 0 : length(var.sql_dedicated_gateway)
+  cosmosdb_account_id = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.sql_dedicated_gateway[count.index], "account_id"))
+  instance_count      = lookup(azurerm_cosmosdb_sql_dedicated_gateway[count.index], "instance_count")
+  instance_size       = lookup(azurerm_cosmosdb_sql_dedicated_gateway[count.index], "instance_size")
+}
+
+resource "azurerm_cosmosdb_sql_function" "this" {
+  count        = length(var.sql_container) == 0 ? 0 : length(var.sql_function)
+  body         = lookup(var.sql_function[count.index], "body")
+  container_id = element(azurerm_cosmosdb_sql_container.this.*.id, lookup(var.sql_function[count.index], "container_id"))
+  name         = lookup(var.sql_function[count.index], "name")
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) && length(var.sql_database) && length(var.sql_role_definition) == 0 ? 0 : length(var.sql_role_assignment)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.sql_role_assignment[count.index], "account_id"))
+  principal_id        = data.azurerm_client_config.this.object_id
+  resource_group_name = data.azurerm_resource_group.this.name
+  role_definition_id  = element(azurerm_cosmosdb_sql_role_definition.this.*.id, lookup(var.sql_role_assignment[count.index], "role_definition_id"))
+  scope               = lookup(var.sql_role_assignment[count.index], "scope")
+  name                = lookup(var.sql_role_assignment[count.index], "name")
+}
+
+resource "azurerm_cosmosdb_sql_role_definition" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) && length(var.sql_database) == 0 ? 0 : length(var.sql_role_definition)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.sql_role_definition[count.index], "account_id"))
+  assignable_scopes   = lookup(var.sql_role_definition[count.index], "assignable_scopes")
+  name                = lookup(var.sql_role_definition[count.index], "name")
+  resource_group_name = data.azurerm_resource_group.this.name
+  role_definition_id = lookup(var.sql_role_definition[count.index], "role_definition_id")
+  type = lookup(var.sql_role_definition[count.index], "type")
+
+  dynamic "permissions" {
+    for_each = lookup(var.sql_role_definition[count.index], "permissions")
+    content {
+      data_actions = lookup(permissions.value, "data_actions")
+    }
+  }
+}
+
+resource "azurerm_cosmosdb_sql_stored_procedure" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) && length(var.sql_database) && length(var.sql_container) == 0 ? 0 : length(var.sql_stored_procedure)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.sql_stored_procedure[count.index], "account_id"))
+  body                = lookup(var.sql_stored_procedure[count.index], "body")
+  container_name      = element(azurerm_cosmosdb_sql_container.this.*.name, lookup(var.sql_stored_procedure[count.index], "container_id"))
+  database_name       = element(azurerm_cosmosdb_sql_database.this.*.name, lookup(var.sql_stored_procedure[count.index], "database_id"))
+  name                = lookup(var.sql_stored_procedure[count.index], "name")
+  resource_group_name = data.azurerm_resource_group.this.name
+}
+
+resource "azurerm_cosmosdb_sql_trigger" "this" {
+  count        = length(var.sql_container) == 0 ? 0 : length(var.sql_trigger)
+  body         = lookup(var.sql_trigger[count.index], "body")
+  container_id = element(azurerm_cosmosdb_sql_container.this.*.id, lookup(var.sql_trigger[count.index], "container_id"))
+  name         = lookup(var.sql_trigger[count.index], "name")
+  operation    = lookup(var.sql_trigger[count.index], "operation")
+  type         = lookup(var.sql_trigger[count.index], "type")
+}
+
+resource "azurerm_cosmosdb_table" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) && length(var.sql_database) == 0 ? 0 : length(var.table)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.table[count.index], "account_id"))
+  name                = lookup(var.table[count.index], "name")
+  resource_group_name = data.azurerm_resource_group.this.name
+  throughput          = lookup(var.sql_database[count.index], "throughput")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.sql_database[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+}

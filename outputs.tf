@@ -91,3 +91,59 @@ output "mongo_user_definition_password" {
   value = try(azurerm_cosmosdb_mongo_user_definition.this.*.password)
   sensitive = true
 }
+
+output "sql_container_id" {
+  value = try(azurerm_cosmosdb_sql_container.this.*.id)
+}
+
+output "sql_container_name" {
+  value = try(azurerm_cosmosdb_sql_container.this.*.name)
+}
+
+output "sql_database_id" {
+  value = try(azurerm_cosmosdb_sql_database.this.*.id)
+}
+
+output "sql_role_definition_id" {
+  value = try(azurerm_cosmosdb_sql_role_definition.this.*.id)
+}
+
+output "sql_role_definition_name" {
+  value = try(azurerm_cosmosdb_sql_role_definition.this.*.name)
+}
+
+output "sql_dedicated_gateway_id" {
+  value = try(azurerm_cosmosdb_sql_dedicated_gateway.this.*.id)
+}
+
+output "sql_function_id" {
+  value = try(azurerm_cosmosdb_sql_function.this.*.id)
+}
+
+output "sql_function_name" {
+  value = try(azurerm_cosmosdb_sql_function.this.*.name)
+}
+
+output "sql_stored_procedure_id" {
+  value = try(azurerm_cosmosdb_sql_stored_procedure.this.*.id)
+}
+
+output "sql_stored_procedure_name" {
+  value = try(azurerm_cosmosdb_sql_stored_procedure.this.*.name)
+}
+
+output "sql_trigger_id" {
+  value = try(azurerm_cosmosdb_sql_trigger.this.*.id)
+}
+
+output "sql_trigger_name" {
+  value = try(azurerm_cosmosdb_sql_trigger.this.*.name)
+}
+
+output "table_id" {
+  value = try(azurerm_cosmosdb_table.this.*.id)
+}
+
+output "table_name" {
+  value = try(azurerm_cosmosdb_table.this.*.name)
+}

@@ -358,3 +358,209 @@ variable "mongo_user_definition" {
   }))
   default = []
 }
+
+variable "postgresql_cluster" {
+  type = list(object({
+    id                                   = any
+    name                                 = string
+    node_count                           = number
+    administrator_login_password         = optional(string)
+    citus_version                        = optional(string)
+    coordinator_public_ip_access_enabled = optional(bool)
+    coordinator_server_edition           = optional(string)
+    coordinator_storage_quota_in_mb      = optional(number)
+    coordinator_vcore_count              = optional(number)
+    ha_enabled                           = optional(bool)
+    node_public_ip_access_enabled        = optional(bool)
+    node_server_edition                  = optional(string)
+    node_storage_quota_in_mb             = optional(number)
+    node_vcores                          = optional(number)
+    point_in_time_in_utc                 = optional(string)
+    preferred_primary_zone               = optional(string)
+    shards_on_coordinator_enabled        = optional(bool)
+    source_location                      = optional(string)
+    source_resource_id                   = optional(string)
+    sql_version                          = optional(string)
+    tags                                 = optional(map(string))
+  }))
+  default = []
+}
+
+variable "postgresql_coordinator_configuration" {
+  type = list(object({
+    id         = any
+    cluster_id = any
+    name       = string
+    value      = string
+  }))
+  default = []
+}
+
+variable "postgresql_firewall_rule" {
+  type = list(object({
+    id               = any
+    cluster_id       = any
+    end_ip_address   = string
+    name             = string
+    start_ip_address = string
+  }))
+  default = []
+}
+
+variable "postgresql_node_configuration" {
+  type = list(object({
+    id         = any
+    cluster_id = any
+    name       = string
+    value      = string
+  }))
+  default = []
+}
+
+variable "postgresql_role" {
+  type = list(object({
+    id         = any
+    cluster_id = any
+    name       = string
+    password   = string
+  }))
+  default = []
+}
+
+variable "sql_container" {
+  type = list(object({
+    id                     = any
+    account_id             = any
+    database_id            = any
+    name                   = string
+    partition_key_paths    = list(string)
+    partition_key_kind     = optional(string)
+    partition_key_version  = optional(number)
+    default_ttl            = optional(number)
+    analytical_storage_ttl = optional(number)
+    throughput             = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+    index_policy = optional(list(object({
+      indexing_mode = string
+      included_paths = optional(list(object({
+        path = string
+      })), [])
+      composite_index = optional(list(object({
+        index = optional(list(object({
+          order = string
+          path  = string
+        })), [])
+      })), [])
+      spatial_index = optional(list(object({
+        path = string
+      })), [])
+    })), [])
+    conflict_resolution_policy = optional(list(object({
+      mode                          = string
+      conflict_resolution_path      = optional(string)
+      conflict_resolution_procedure = optional(string)
+    })), [])
+    unique_key = optional(list(object({
+      paths = list(string)
+    })), [])
+  }))
+  default = []
+}
+
+variable "sql_database" {
+  type = list(object({
+    id         = any
+    account_id = any
+    name       = string
+    throughput = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+  }))
+  default = []
+}
+
+variable "sql_dedicated_gateway" {
+  type = list(object({
+    id                  = any
+    cosmosdb_account_id = any
+    instance_count      = number
+    instance_size       = string
+  }))
+  default = []
+}
+
+variable "sql_function" {
+  type = list(object({
+    id           = any
+    body         = string
+    container_id = any
+    name         = string
+  }))
+  default = []
+}
+
+variable "sql_role_assignment" {
+  type = list(object({
+    id                 = any
+    account_id         = any
+    role_definition_id = any
+    scope              = string
+    name               = optional(string)
+  }))
+  default = []
+}
+
+variable "sql_role_definition" {
+  type = list(object({
+    id                = any
+    account_id        = any
+    assignable_scopes = list(string)
+    name              = string
+    role_definition_id = optional(any)
+    type = optional(string)
+    permissions = list(object({
+      data_actions = list(any)
+    }))
+  }))
+  default = []
+}
+
+variable "sql_stored_procedure" {
+  type = list(object({
+    id           = any
+    account_id   = any
+    body         = string
+    container_id = any
+    database_id  = any
+    name         = string
+  }))
+  default = []
+}
+
+variable "sql_trigger" {
+  type = list(object({
+    id           = any
+    body         = string
+    container_id = any
+    name         = string
+    operation    = string
+    type         = string
+  }))
+  default = []
+}
+
+variable "table" {
+  type = list(object({
+    id         = any
+    account_id = any
+    name       = string
+    throughput = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+  }))
+  default = []
+}
