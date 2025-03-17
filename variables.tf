@@ -242,3 +242,119 @@ variable "cassandra_table" {
   }))
   default = []
 }
+
+variable "gremlin_database" {
+  type = list(object({
+    id         = any
+    account_id = any
+    name       = string
+    throughput = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+  }))
+  default = []
+}
+
+variable "gremlin_graph" {
+  type = list(object({
+    id                     = any
+    account_id             = any
+    database_id            = any
+    name                   = string
+    partition_key_path     = string
+    partition_key_version  = optional(number)
+    throughput             = optional(number)
+    analytical_storage_ttl = optional(number)
+    default_ttl            = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+    index_policy = optional(list(object({
+      indexing_mode  = string
+      automatic      = optional(bool)
+      included_paths = optional(list(string))
+      excluded_paths = optional(list(string))
+      composite_index = optional(list(object({
+        index = optional(list(object({
+          order = string
+          path  = string
+        })), [])
+      })), [])
+      spatial_index = optional(list(object({
+        path = string
+      })), [])
+    })), [])
+    conflict_resolution_policy = optional(list(object({
+      mode                          = string
+      conflict_resolution_path      = optional(string)
+      conflict_resolution_procedure = optional(string)
+    })), [])
+    unique_key = optional(list(object({
+      paths = list(string)
+    })), [])
+  }))
+  default = []
+}
+
+variable "mongo_collection" {
+  type = list(object({
+    id                     = any
+    account_id             = any
+    database_id            = any
+    name                   = string
+    shard_key              = optional(string)
+    analytical_storage_ttl = optional(number)
+    default_ttl_seconds    = optional(number)
+    throughput             = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+    index = optional(list(object({
+      keys   = list(string)
+      unique = optional(bool)
+    })), [])
+  }))
+  default = []
+}
+
+variable "mongo_database" {
+  type = list(object({
+    id         = any
+    account_id = any
+    name       = string
+    throughput = optional(number)
+    autoscale_settings = optional(list(object({
+      max_throughput = optional(number)
+    })), [])
+  }))
+  default = []
+}
+
+variable "mongo_role_definition" {
+  type = list(object({
+    id                       = any
+    cosmos_mongo_database_id = any
+    role_name                = string
+    inherited_role_names     = optional(list(string))
+    privilege = optional(list(object({
+      actions = list(any)
+      resource = list(object({
+        collection_name = optional(string)
+        db_name         = optional(string)
+      }))
+    })), [])
+  }))
+  default = []
+}
+
+variable "mongo_user_definition" {
+  type = list(object({
+    id                       = any
+    cosmos_mongo_database_id = any
+    password                 = string
+    username                 = string
+    inherited_role_names     = optional(list(string))
+  }))
+  default = []
+}

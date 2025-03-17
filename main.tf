@@ -220,3 +220,157 @@ resource "azurerm_cosmosdb_cassandra_table" "this" {
     }
   }
 }
+
+resource "azurerm_cosmosdb_gremlin_database" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) == 0 ? 0 : length(var.gremlin_database)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.gremlin_database[count.index], "account_id"))
+  name                = lookup(var.gremlin_database[count.index], "name")
+  resource_group_name = data.azurerm_resource_group.this.*.name
+  throughput          = lookup(var.gremlin_database[count.index], "throughput")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.gremlin_database[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+}
+
+resource "azurerm_cosmosdb_gremlin_graph" "this" {
+  count                  = (length(var.account) || var.cosmosdb_account_name) && length(var.gremlin_database) == 0 ? 0 : length(var.gremlin_graph)
+  account_name           = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.gremlin_graph[count.index], "account_id"))
+  database_name          = element(azurerm_cosmosdb_gremlin_database.this.*.name, lookup(var.gremlin_graph[count.index], "database_id"))
+  name                   = lookup(var.gremlin_graph[count.index], "name")
+  partition_key_path     = lookup(var.gremlin_graph[count.index], "partition_key_path")
+  resource_group_name    = data.azurerm_resource_group.this.name
+  partition_key_version  = lookup(var.gremlin_graph[count.index], "partition_key_version")
+  throughput             = lookup(var.gremlin_graph[count.index], "throughput")
+  analytical_storage_ttl = lookup(var.gremlin_graph[count.index], "analytical_storage_ttl")
+  default_ttl            = lookup(var.gremlin_graph[count.index], "default_ttl")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.gremlin_graph[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+
+  dynamic "index_policy" {
+    for_each = try(lookup(var.gremlin_graph[count.index], "index_policy") == null ? [] : ["index_policy"])
+    content {
+      indexing_mode  = lookup(index_policy.value, "indexing_mode")
+      automatic      = lookup(index_policy.value, "automatic")
+      included_paths = lookup(index_policy.value, "included_paths")
+      excluded_paths = lookup(index_policy.value, "excluded_paths")
+
+      dynamic "composite_index" {
+        for_each = try(lookup(index_policy.value, "composite_index") == null ? [] : ["composite_index"])
+        content {
+          dynamic "index" {
+            for_each = try(lookup(composite_index.value, "index") == null ? [] : ["index"])
+            content {
+              order = lookup(index.value, "order")
+              path  = lookup(index.value, "path")
+            }
+          }
+        }
+      }
+
+      dynamic "spatial_index" {
+        for_each = try(lookup(index_policy.value, "spatial_index") == null ? [] : ["spatial_index"])
+        content {
+          path = lookup(spatial_index.value, "path")
+        }
+      }
+    }
+  }
+
+  dynamic "conflict_resolution_policy" {
+    for_each = try(lookup(var.gremlin_graph[count.index], "conflict_resolution_policy") == null ? [] : ["conflict_resolution_policy"])
+    content {
+      mode                          = lookup(conflict_resolution_policy.value, "mode")
+      conflict_resolution_path      = lookup(conflict_resolution_policy.value, "conflict_resolution_path")
+      conflict_resolution_procedure = lookup(conflict_resolution_policy.value, "conflict_resolution_procedure")
+    }
+  }
+
+  dynamic "unique_key" {
+    for_each = try(lookup(var.gremlin_graph[count.index], "unique_key") == null ? [] : ["unique_key"])
+    content {
+      paths = lookup(unique_key.value, "paths")
+    }
+  }
+}
+
+resource "azurerm_cosmosdb_mongo_collection" "this" {
+  count                  = (length(var.account) || var.cosmosdb_account_name) && length(var.mongo_database) == 0 ? 0 : length(var.mongo_collection)
+  account_name           = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.mongo_collection[count.index], "account_id"))
+  database_name          = element(azurerm_cosmosdb_mongo_database.this.*.name, lookup(var.mongo_collection[count.index], "database_id"))
+  name                   = lookup(var.mongo_collection[count.index], "name")
+  resource_group_name    = data.azurerm_resource_group.this.name
+  shard_key              = lookup(var.mongo_collection[count.index], "shard_key")
+  analytical_storage_ttl = lookup(var.mongo_collection[count.index], "analytical_storage_ttl")
+  default_ttl_seconds    = lookup(var.mongo_collection[count.index], "default_ttl_seconds")
+  throughput             = lookup(var.mongo_collection[count.index], "throughput")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.mongo_collection[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+
+  dynamic "index" {
+    for_each = try(lookup(var.mongo_collection[count.index], "index") == null ? [] : ["index"])
+    content {
+      keys   = lookup(index.value, "keys")
+      unique = lookup(index.value, "unique")
+    }
+  }
+
+}
+
+resource "azurerm_cosmosdb_mongo_database" "this" {
+  count               = (length(var.account) || var.cosmosdb_account_name) == 0 ? 0 : length(var.mongo_database)
+  account_name        = var.cosmosdb_account_name ? data.azurerm_cosmosdb_account.this.name : element(azurerm_cosmosdb_account.this.*.name, lookup(var.mongo_database[count.index], "account_id"))
+  name                = lookup(var.mongo_database[count.index], "name")
+  resource_group_name = data.azurerm_resource_group.this.name
+  throughput          = lookup(var.gremlin_database[count.index], "throughput")
+
+  dynamic "autoscale_settings" {
+    for_each = try(lookup(var.gremlin_database[count.index], "autoscale_settings") == null ? [] : ["autoscale_settings"])
+    content {
+      max_throughput = lookup(autoscale_settings.value, "max_throughput")
+    }
+  }
+}
+
+resource "azurerm_cosmosdb_mongo_role_definition" "this" {
+  count                    = length(var.mongo_database) == 0 ? 0 : length(var.mongo_role_definition)
+  cosmos_mongo_database_id = element(azurerm_cosmosdb_mongo_database.this.*.id, lookup(var.mongo_role_definition[count.index], "cosmos_mongo_database_id"))
+  role_name                = lookup(var.mongo_role_definition[count.index], "role_name")
+  inherited_role_names     = lookup(var.mongo_role_definition[count.index], "inherited_role_names")
+
+  dynamic "privilege" {
+    for_each = try(lookup(var.mongo_role_definition[count.index], "privilege") == null ? [] : ["privilege"])
+    content {
+      actions = lookup(privilege.value, "actions")
+
+      dynamic "resource" {
+        for_each = lookup(privilege.value, "resource")
+        content {
+          collection_name = lookup(resource.value, "collection_name")
+          db_name         = lookup(resource.value, "db_name")
+        }
+      }
+    }
+  }
+}
+
+resource "azurerm_cosmosdb_mongo_user_definition" "this" {
+  count                    = length(var.mongo_database) == 0 ? 0 : length(var.mongo_user_definition)
+  cosmos_mongo_database_id = element(azurerm_cosmosdb_mongo_database.this.*.id, lookup(var.mongo_user_definition[count.index], "cosmos_mongo_database_id"))
+  password                 = sensitive(lookup(var.mongo_user_definition[count.index], "password"))
+  username                 = sensitive(lookup(var.mongo_user_definition[count.index], "username"))
+  inherited_role_names     = lookup(var.mongo_user_definition[count.index], "inherited_role_names")
+}
